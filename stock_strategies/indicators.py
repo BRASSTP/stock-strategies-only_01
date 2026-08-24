@@ -14,7 +14,8 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
 """
     df["vol_20"] = df['volume'].iloc[-20:].mean()
     df["vol_5"] = df['volume'].iloc[-5:].mean()
-    
+    df["vol_1"] = df['volume'].iloc[0:].mean()
+
     df["bb_mid"] = df["close"].rolling(20).mean()
     bb_std = df["close"].rolling(20).std()
     df["bb_upper"] = df["bb_mid"] + 2 * bb_std
@@ -69,11 +70,11 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
         elif row["close"] > row["ma20"]:
             score += max_per * 0.48
             
-    if use_vol and pd.notna(row["vol_5"]) and pd.notna(row["vol_20"]):
-        if row["volume"] > row["vol_20"] :
+    if use_vol and pd.notna(row["vol_1"]) and pd.notna(row["vol_5"]) and pd.notna(row["vol_20"]):
+        if row["vol_1"] > row["vol_20"] :
             score += max_per
             signals.append("量增輪迴")
-        elif row["volume"] > row["vol_5"]:
+        elif row["vol_1"] > row["vol_5"]:
             score += max_per * 0.3
 
     if use_bb and pd.notna(row["bb_lower"]) and pd.notna(row["bb_mid"]):
