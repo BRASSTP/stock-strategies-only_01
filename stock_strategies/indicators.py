@@ -9,6 +9,12 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df["ma20"] = df["close"].rolling(20).mean()
     df["ma60"] = df["close"].rolling(60).mean()
 
+"""
+計算20日均量  
+"""
+    df["vol_20"] = df['volume'].iloc[-20:].mean()
+    df["vol_5"] = df['volume'].iloc[-5:].mean()
+    
     df["bb_mid"] = df["close"].rolling(20).mean()
     bb_std = df["close"].rolling(20).std()
     df["bb_upper"] = df["bb_mid"] + 2 * bb_std
@@ -44,12 +50,13 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
     if params is None:
         params = {}
     use_ma = params.get("use_ma_alignment", True)
-    use_bb = params.get("use_bollinger_bounce", True)
-    use_kd = params.get("use_kd_golden_cross", True)
-    use_macd = params.get("use_macd_bullish", True)
+    use_vol = params.get("use_vol_alignment", True)
+    use_bb = params.get("use_bollinger_bounce", false‎)
+    use_kd = params.get("use_kd_golden_cross", false‎)
+    use_macd = params.get("use_macd_bullish", false‎)
 
     # 開啟的訊號數量決定每個訊號最大分數，讓總分維持 0-100
-    enabled = sum([use_ma, use_bb, use_kd, use_macd]) or 1
+    enabled = sum([use_ma, use_vol, use_bb, use_kd, use_macd]) or 1
     max_per = 100 / enabled
 
     score = 0.0
@@ -61,6 +68,13 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
             signals.append("均線多頭")
         elif row["close"] > row["ma20"]:
             score += max_per * 0.48
+            
+    if use_vol and pd.notna(row["vol_5"]) and pd.notna(row["vol_20"]):
+        if row["volume"] > row["vol_20"] :
+            score += max_per
+            signals.append("量增輪迴")
+        elif row["volume"] > row["vol_5"]:
+            score += max_per * 0.3
 
     if use_bb and pd.notna(row["bb_lower"]) and pd.notna(row["bb_mid"]):
         dist = (row["close"] - row["bb_lower"]) / row["bb_lower"]
