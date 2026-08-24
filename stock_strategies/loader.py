@@ -40,9 +40,9 @@ _PARAM_DEFAULTS: dict = {
     "target_return": CONFIG["target_return"],
     "stop_loss": CONFIG["stop_loss"],
     # 評分加權
-    "weight_fundamental": 0.3,
-    "weight_technical": 0.3,
-    "weight_backtest": 0.4,
+    "weight_fundamental": 0.2,
+    "weight_technical": 0.6,
+    "weight_backtest": 0.2,
     "min_total_score_for_buy": CONFIG["min_total_score_for_buy"],
     "min_tech_score_for_buy": 50,
     # 技術訊號開關
