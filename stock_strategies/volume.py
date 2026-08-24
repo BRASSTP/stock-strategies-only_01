@@ -59,6 +59,14 @@ def detect_patterns(df: pd.DataFrame, idx: int = -1) -> dict:
         bonus += 8
         details["低量柱"] = f"今日量僅 20 日均量 {vol_today/vol_20ma*100:.0f}%，拋壓耗盡"
 
+    # 量增輪迴：今日量 >  20 日均量
+    vol_20ma = float(vol.iloc[max(0, idx - 20):idx].mean())
+    if vol_20ma > 0 and vol_today > vol_20ma:
+        patterns.append("量增輪迴")
+        bonus += 8
+        details["量增輪迴"] = f"今日量大於 20 日均量 {vol_today/vol_20ma*100:.0f}%，出量"
+
+    
     # 平量柱：連續 3 日量能高度一致（變化率 < 15%）— 多空平衡，蓄力中
     if idx >= 2:
         v3 = float(vol.iloc[idx])
