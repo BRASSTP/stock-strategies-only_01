@@ -107,6 +107,8 @@ def detect_patterns(df: pd.DataFrame, idx: int = -1) -> dict:
 
 def verdict(patterns: list[str]) -> str:
     """根據偵測到的量能型態給出結論"""
+    if "量增輪迴" in patterns:
+        return "🟢 大於20均量，出量注意了"
     if "放量滯漲" in patterns:
         return "⚠️ 高檔爆量疑似出貨，持有者應考慮砍半鎖利"
     if "倍量柱" in patterns and "梯量柱" in patterns:
