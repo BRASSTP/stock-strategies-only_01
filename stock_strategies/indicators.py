@@ -11,10 +11,13 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
 """
 計算20日均量  
+df["vol_20"] = df['volume'].iloc[-20:].mean()
+df["vol_5"] = df['volume'].iloc[-5:].mean()
+df["vol_1"] = df['volume'].iloc[0:].mean()
 """
-    df["vol_20"] = df['volume'].iloc[-20:].mean()
-    df["vol_5"] = df['volume'].iloc[-5:].mean()
-    df["vol_1"] = df['volume'].iloc[0:].mean()
+   df["vol_1"] = df["volume"].rolling(1).mean()
+    df["vol_5"] = df["volume"].rolling(5).mean()
+    df["vol_20"] = df["volume"].rolling(20).mean()
 
     df["bb_mid"] = df["close"].rolling(20).mean()
     bb_std = df["close"].rolling(20).std()
