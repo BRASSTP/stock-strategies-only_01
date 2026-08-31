@@ -12,9 +12,14 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
 """
 計算20日均量  
 """
-   df["vol_1"] = df["volume"].rolling(1).mean()
-    df["vol_5"] = df["volume"].rolling(5).mean()
-    df["vol_20"] = df["volume"].rolling(20).mean()
+    vol = df["volume"]
+    vol_today = float(vol.iloc[idx])
+def detect_patterns(df: pd.DataFrame, idx: int = -1) -> dict:
+    vol = df["volume"]
+    vol_today = float(vol.iloc[idx])
+    vol_20ma = float(vol.iloc[max(0, idx - 20):idx].mean())
+    vol_5ma = float(vol.iloc[max(0, idx - 5):idx].mean())
+
 
     df["bb_mid"] = df["close"].rolling(20).mean()
     bb_std = df["close"].rolling(20).std()
@@ -70,12 +75,12 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
         elif row["close"] > row["ma20"]:
             score += max_per * 0.48
             
-    if use_vol and pd.notna(row["vol_1"]) and pd.notna(row["vol_5"]) and pd.notna(row["vol_20"]):
-        if row["vol_1"] > row["vol_20"] :
+    if use_vol and pd.notna(row["vol_today"]) and pd.notna(row["vol_5ma"]) and pd.notna(row["vol_20ma"]):
+        if row["vol_today"] > row["vol_20ma"] :
             score += max_per
             signals.append("量增輪迴")
-        elif row["vol_1"] > row["vol_5"]:
-            score += max_per * 0.3
+        elif row["vol_today"] > row["vol_5ma"]:
+            score += max_per * 0.1
 
     if use_bb and pd.notna(row["bb_lower"]) and pd.notna(row["bb_mid"]):
         dist = (row["close"] - row["bb_lower"]) / row["bb_lower"]
