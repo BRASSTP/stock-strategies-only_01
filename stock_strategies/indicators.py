@@ -12,10 +12,11 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
 """
 計算20日均量  
 """
-def detect_patterns(df: pd.DataFrame, idx: int = -1) -> dict:
-vol_today = float(volume.iloc[idx])
-vol_20ma = float(volume.iloc[max(0, idx - 20):idx].mean())
-vol_5ma = float(volume.iloc[max(0, idx - 5):idx].mean())
+def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df["vol_5ma"] = df["volume"].rolling(5).mean()
+    df["vol_20ma"] = df["volume"].rolling(20).mean()
+    df["vol_1ma"] = df["volume"].rolling(1).mean()
 
     return df
 
@@ -46,10 +47,10 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
             score += max_per * 0.48
             
     if use_vol and pd.notna(row["vol_today"]) and pd.notna(row["vol_5ma"]) and pd.notna(row["vol_20ma"]):
-        if row["vol_today"] > row["vol_20ma"] :
+        if row["vol_1ma"] > row["vol_20ma"] :
             score += max_per
             signals.append("量增輪迴")
-        elif row["vol_today"] > row["vol_5ma"]:
+        elif row["vol_1ma"] > row["vol_5ma"]:
             score += max_per * 0.1
 
     return {"score": int(round(score)), "signals": signals}
