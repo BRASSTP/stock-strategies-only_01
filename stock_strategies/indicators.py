@@ -17,31 +17,6 @@ vol_today = float(volume.iloc[idx])
 vol_20ma = float(volume.iloc[max(0, idx - 20):idx].mean())
 vol_5ma = float(volume.iloc[max(0, idx - 5):idx].mean())
 
-
-    df["bb_mid"] = df["close"].rolling(20).mean()
-    bb_std = df["close"].rolling(20).std()
-    df["bb_upper"] = df["bb_mid"] + 2 * bb_std
-    df["bb_lower"] = df["bb_mid"] - 2 * bb_std
-
-    low_min = df["low"].rolling(9).min()
-    high_max = df["high"].rolling(9).max()
-    rsv = (df["close"] - low_min) / (high_max - low_min) * 100
-    df["k"] = rsv.ewm(com=2).mean()
-    df["d"] = df["k"].ewm(com=2).mean()
-
-    ema12 = df["close"].ewm(span=12, adjust=False).mean()
-    ema26 = df["close"].ewm(span=26, adjust=False).mean()
-    df["dif"] = ema12 - ema26
-    df["dea"] = df["dif"].ewm(span=9, adjust=False).mean()
-    df["macd_hist"] = df["dif"] - df["dea"]
-
-    tr = pd.concat([
-        df["high"] - df["low"],
-        (df["high"] - df["close"].shift()).abs(),
-        (df["low"] - df["close"].shift()).abs(),
-    ], axis=1).max(axis=1)
-    df["atr"] = tr.rolling(14).mean()
-
     return df
 
 
@@ -54,12 +29,10 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
         params = {}
     use_ma = params.get("use_ma_alignment", True)
     use_vol = params.get("use_vol_alignment", True)
-    use_bb = params.get("use_bollinger_bounce", false‎)
-    use_kd = params.get("use_kd_golden_cross", false‎)
-    use_macd = params.get("use_macd_bullish", false‎)
+   
 
     # 開啟的訊號數量決定每個訊號最大分數，讓總分維持 0-100
-    enabled = sum([use_ma, use_vol, use_bb, use_kd, use_macd]) or 1
+    enabled = sum([use_ma, use_vol]) or 1
     max_per = 100 / enabled
 
     score = 0.0
@@ -78,27 +51,5 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
             signals.append("量增輪迴")
         elif row["vol_today"] > row["vol_5ma"]:
             score += max_per * 0.1
-
-    if use_bb and pd.notna(row["bb_lower"]) and pd.notna(row["bb_mid"]):
-        dist = (row["close"] - row["bb_lower"]) / row["bb_lower"]
-        if 0 < dist < 0.03:
-            score += max_per
-            signals.append("布林下軌反彈")
-        elif row["close"] < row["bb_mid"]:
-            score += max_per * 0.4
-
-    if use_kd and pd.notna(row["k"]) and pd.notna(row["d"]):
-        if row["k"] > row["d"] and row["k"] < 80:
-            score += max_per
-            signals.append("KD黃金交叉")
-        elif row["k"] > row["d"]:
-            score += max_per * 0.4
-
-    if use_macd and pd.notna(row["macd_hist"]):
-        if row["macd_hist"] > 0 and row["dif"] > row["dea"]:
-            score += max_per
-            signals.append("MACD多頭")
-        elif row["macd_hist"] > 0:
-            score += max_per * 0.4
 
     return {"score": int(round(score)), "signals": signals}
