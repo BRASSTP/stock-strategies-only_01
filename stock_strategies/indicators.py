@@ -13,36 +13,9 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
 計算20日均量  
 """
 def detect_patterns(df: pd.DataFrame, idx: int = -1) -> dict:
-      n = len(vol)
-    
-    # 將負數索引轉換為絕對正數索引（例如：idx=-1 轉為 n-1）
-    if idx < 0:
-        idx = n + idx
-        
-    # 檢查索引是否超出範圍
-    if idx < 0 or idx >= n:
-        raise IndexError("傳入的 idx 超出 DataFrame 範圍")
-        
-    # 取得指定位置當天的成交量
-    vol_today = float(volume.iloc[idx])
-    
-    # 取出前 20 天（不含當天）與前 5 天（不含當天）的資料區間
-    # 若歷史資料不足 20 天/5 天，則自動取到開頭 (index 0)
-    start_20 = max(0, idx - 20)
-    start_5 = max(0, idx - 5)
-    
-    # 當沒有前置歷史資料時（例如 idx = 0），避免 mean() 算出一乾二淨的 NaN
-    vol_20ma_data = volume.iloc[start_20:idx]
-    vol_5ma_data = volume.iloc[start_5:idx]
-    
-    vol_20ma = float(vol_20ma_data.mean()) if not vol_20ma_data.empty else vol_today
-    vol_5ma = float(vol_5ma_data.mean()) if not vol_5ma_data.empty else vol_today
-    
-    return {
-        "vol_today": vol_today,
-        "vol_20ma": vol_20ma,
-        "vol_5ma": vol_5ma
-    }
+vol_today = float(volume.iloc[idx])
+vol_20ma = float(volume.iloc[max(0, idx - 20):idx].mean())
+vol_5ma = float(volume.iloc[max(0, idx - 5):idx].mean())
 
 
     df["bb_mid"] = df["close"].rolling(20).mean()
