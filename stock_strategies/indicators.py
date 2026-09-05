@@ -8,6 +8,7 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df["ma5"] = df["close"].rolling(5).mean()
     df["ma20"] = df["close"].rolling(20).mean()
     df["ma60"] = df["close"].rolling(60).mean()
+    df["ma200"] = df["close"].rolling(200).mean()
 
 """
 計算20日均量  
@@ -33,24 +34,26 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
    
 
     # 開啟的訊號數量決定每個訊號最大分數，讓總分維持 0-100
-    enabled = sum([use_ma, use_vol]) or 1
-    max_per = 100 / enabled
+    max_per = 100 
 
     score = 0.0
     signals: list[str] = []
 
-    if use_ma and pd.notna(row["ma20"]) and pd.notna(row["ma60"]):
-        if row["close"] > row["ma20"] > row["ma60"]:
-            score += max_per
+    if use_ma and pd.notna(row["ma5"]) and row["ma20"]) and pd.notna(row["ma60"] and pd.notna(row["ma200"]):
+        
+        if row["close"] > row["ma5"] > row["ma20"]> row["ma60"]> row["ma200"]:
+            score += 70
             signals.append("均線多頭")
-        elif row["close"] > row["ma20"]:
-            score += max_per * 0.48
+        elif row["close"] > row["ma5"] > row["ma20"]> row["ma60"]:
+            score += 40
+        elif row["close"] > row["ma5"] > row["ma20"]:
+            score += 20
             
     if use_vol and pd.notna(row["vol_today"]) and pd.notna(row["vol_5ma"]) and pd.notna(row["vol_20ma"]):
         if row["vol_1ma"] > row["vol_20ma"] :
-            score += max_per
+            score += 30
             signals.append("量增輪迴")
         elif row["vol_1ma"] > row["vol_5ma"]:
-            score += max_per * 0.1
+            score += 10
 
     return {"score": int(round(score)), "signals": signals}
