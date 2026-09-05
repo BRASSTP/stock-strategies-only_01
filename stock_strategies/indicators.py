@@ -12,8 +12,6 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
 """
 計算20日均量  
 """
-    vol = df["volume"]
-    vol_today = float(vol.iloc[idx])
 def detect_patterns(df: pd.DataFrame, idx: int = -1) -> dict:
     vol = df["volume"]
     vol_today = float(vol.iloc[idx])
