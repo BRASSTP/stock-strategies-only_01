@@ -39,7 +39,7 @@ def tech_score_at(row: pd.Series, params: dict | None = None) -> dict:
     score = 0.0
     signals: list[str] = []
 
-    if use_ma and pd.notna(row["ma5"]) and row["ma20"]) and pd.notna(row["ma60"] and pd.notna(row["ma200"]):
+    if use_ma and pd.notna(row["ma5"]) and pd.notna(row["ma20"]) and pd.notna(row["ma60"] and pd.notna(row["ma200"]):
         
         if row["close"] > row["ma5"] > row["ma20"]> row["ma60"]> row["ma200"]:
             score += 70
